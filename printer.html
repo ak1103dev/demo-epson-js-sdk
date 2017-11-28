@@ -8,16 +8,39 @@
 <script type="text/javascript" src="epos-2.6.0.js"></script>
 <script type="text/javascript">
 
-
+  var ePosDev = new epson.ePOSDevice();
 	function connect(){
+    var ip = '192.168.1.53'
+    var port = '8008'
+    // ePosDev.connect(ip, port, callback_connect)
+    ePosDev.connect('192.168.1.53', '8008', callback_connect)
+  }
 
-	}
+  function callback_connect(resultConnect) {
+    var options = {crypto: false, buffer: false};
+    var deviceID = 'local_printer';
 
-	
+    if (resultConnect === 'OK') {
+      ePosDev.createDevice(deviceID, ePosDev.DEVICE_TYPE_PRINTER, options, callback_createDevice);
+    } else {
+      alert(resultConnect);
+    }
+  }
+
+  var printer = null;
+  function callback_createDevice(deviceObj, errorCode) {
+    printer = deviceObj;
+    alert('connected')
+  }
+
 	function createData(){
-			
+    printer.addTextAlign(printer.ALIGN_CENTER); // Set text alignment to be at center
+    printer.addText('Hello World'); // Add the text "Hello World"
+    printer.addFeedLine(20); // Add 20 line feed to printer command buffer
+    printer.addCut(); // Add cut command
+    printer.send();
 	}
-	
+
 //initialisation
 $(document).ready(function(){
 	$("#connectBtn").click(function(){
@@ -27,7 +50,7 @@ $(document).ready(function(){
 		createData();
 	});
 });
-	
+
 </script>
 ePOS SDK Javascript <br /><br />
 <button id="connectBtn">connect</button>
