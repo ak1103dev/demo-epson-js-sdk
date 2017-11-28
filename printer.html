@@ -33,13 +33,41 @@
     alert('connected')
   }
 
-	function createData(){
+  function setText() {
+    var reverse = false;
+    var underline = false;
+    var bold = true;
+    var color = printer.COLOR_1;
+    var height = 3;
+    var width = 3;
+    printer.addTextStyle(reverse, underline, bold, color);
+    printer.addTextSize(height, width);
     printer.addTextAlign(printer.ALIGN_CENTER); // Set text alignment to be at center
+    printer.addTextSmooth(true);
     // printer.addTextAlign(printer.ALIGN_RIGHT); // Set text alignment to be at right
     // printer.addTextAlign(printer.ALIGN_LEFT); // Set text alignment to be at left
     printer.addText('Hello World'); // Add the text "Hello World"
-    printer.addFeedLine(20); // Add 20 lines feed to printer command buffer
-    // printer.addFeed(); // Add a line feed to printer command buffer
+  }
+
+  function setBarcode() {
+    var data = '10000000103';
+    var barcodeType = printer.BARCODE_CODE39;
+    var width = 2;
+    var height = 32;
+    printer.addBarcode(data, barcodeType, printer.HR_BELOW, printer.FONT_A, width, height)
+  }
+
+  function setQRcode() {
+    printer.addSymbol('https://google.com', printer.SYMBOL_QRCODE_MODEL_2, printer.LEVEL_M, 8, 8, 0);
+  }
+
+	function createData(){
+    setText();
+    printer.addFeed();
+    setBarcode();
+    printer.addFeed();
+    setQRcode();
+    printer.addFeedLine(5); // Add 5 lines feed to printer command buffer
     printer.addCut(); // Add cut command
     printer.send();
 	}
