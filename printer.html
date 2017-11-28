@@ -61,12 +61,22 @@
     printer.addSymbol('https://google.com', printer.SYMBOL_QRCODE_MODEL_2, printer.LEVEL_M, 8, 8, 0);
   }
 
+  function setLogo() {
+    printer.addLogo(34, 34);
+  }
+
 	function createData(){
+    setLogo();
     setText();
     printer.addFeed();
     setBarcode();
     printer.addFeed();
     setQRcode();
+    printer.addFeed();
+
+    printer.addTextLang('th');
+    printer.addText('สวัสดี\n');
+
     printer.addFeedLine(5); // Add 5 lines feed to printer command buffer
     printer.addCut(); // Add cut command
     printer.send();
