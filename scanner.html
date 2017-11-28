@@ -1,0 +1,111 @@
+<html>
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=TIS-11">
+<META HTTP-EQUIV="Content-language" CONTENT="th">
+</head>
+<body>
+<script src="jquery.min.js"></script>
+<script type="text/javascript" src="epos-2.6.0.js"></script>
+<script type="text/javascript">
+
+	var ePosDev = new epson.ePOSDevice();
+
+	function connect(){
+		ePosDev.connect('192.168.1.2','8008',callback_connect);
+	}
+	
+	var printerDev = null;
+	
+	function callback_connect(resultConnect){
+		var options = {'crypto' : false, 'buffer' : false};
+		
+		printerDev = ePosDev;
+		if ((resultConnect == 'OK')) {
+			printerDev.createDevice('local_printer', ePosDev.DEVICE_TYPE_PRINTER, options,callback_createDevice);
+		}
+		else {
+			alert(resultConnect);
+		}
+	}
+	
+	var printer = null;
+	
+	function callback_createDevice(deviceObj, errorCode){
+		printer = deviceObj;
+		document.getElementById("scanData").value = document.getElementById("scanData").value + "printer connected";
+		
+		printer.onreceive = function(response){			
+			if (response.success) {		
+				document.getElementById("scanData").value = "print complete";		
+			}
+			else {
+				alert("Error :" + response.code);	
+			}	
+		};		
+		printer.oncoveropen = function (status){
+		
+			alert("cover open");
+		};
+		
+		printer.startMonitor();	
+	}
+	
+	function callback_createScanner(deviceObj, errorCode){
+		document.getElementById("scanData").value = 
+		document.getElementById("scanData").value + " scanner connected ";
+	}
+	
+	function onData(data){
+
+	}
+	
+	function createData(){
+	
+		printer.addTextAlign(printer.ALIGN_CENTER);
+		
+		printer.addText('Hello World');
+		printer.addFeedLine(20);
+		
+		
+		printer.addTextStyle(true,false,false,printer.COLOR_1);
+		printer.addText('Hello World         \n');
+		printer.addTextStyle(false,true,false,printer.COLOR_1);
+		printer.addText('Hello World         \n');
+		printer.addTextStyle(false,false,true,printer.COLOR_1);
+		printer.addText('Hello World         \n');
+		printer.addFeedLine(10);
+		
+		printer.addText('Hello World\n');
+		printer.addTextSize(3,3);
+		printer.addText('Hello World\n');
+		printer.addFeedLine(10);
+		
+		printer.addText('Hello World\n');
+		printer.addTextSmooth(true);
+		printer.addText('Hello World\n');
+		printer.addFeedLine(10);
+		printer.addCut();
+		
+		printer.send();
+	}
+	
+//initialisation
+$(document).ready(function(){
+	$("#connectBtn").click(function(){
+		connect();
+	});
+	$("#printBtn").click(function(){
+		createData();
+	});
+});
+	
+</script>
+ePOS SDK Javascript <br /><br />
+<button id="connectBtn">connect</button>
+<button id="printBtn">basic print</button>
+<br /><br />
+Console Output:
+<br />
+<input id="scanData" type="text" size = "40"/>
+</body>
+</html>
