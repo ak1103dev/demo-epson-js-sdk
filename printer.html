@@ -9,13 +9,47 @@
 <script type="text/javascript">
 
   var ePosDev = new epson.ePOSDevice();
+  var ePosDisplay = new epson.ePOSDevice();
+
+	function connectLineDisplay(){
+    var ip = '192.168.1.55'
+    var port = '8008'
+    ePosDisplay.connect(ip, port, display_callback_connect)
+  }
+  function display_callback_connect(resultConnect) {
+    var options = {crypto: false, buffer: false};
+    var deviceID = 'local_display';
+
+    if (resultConnect === 'OK' || resultConnect === 'SSL_CONNECT_OK') {
+      ePosDisplay.createDevice(deviceID, ePosDisplay.DEVICE_TYPE_DISPLAY, options, callback_createDisplayDevice);
+    } else {
+      alert(resultConnect);
+    }
+  }
+  var display = null;
+  function callback_createDisplayDevice (deviceObj, errorCode) {
+    if (deviceObj === null) {
+      alert(`error: ${errorCode}`)
+      return;
+    }
+    display = deviceObj;
+    alert('connected');
+
+    display.onreceive = function (response) {
+      if (response.success) {
+
+      } else {
+        alert(`Display Error: ${response.code}`);
+      }
+    }
+    display.startMonitor();
+  }
+
 	function connect(){
     var ip = '192.168.1.51'
     var port = '8008'
     ePosDev.connect(ip, port, callback_connect)
-    // ePosDev.connect('192.168.1.53', '8008', callback_connect)
   }
-
   function callback_connect(resultConnect) {
     var options = {crypto: false, buffer: false};
     var deviceID = 'local_printer';
@@ -26,7 +60,6 @@
       alert(resultConnect);
     }
   }
-
   var printer = null;
   function callback_createDevice(deviceObj, errorCode) {
     printer = deviceObj;
@@ -104,6 +137,15 @@
     printer.send();
 	}
 
+  function showDisplayData () {
+    display.reset(); // Reset/Clear line display buffer
+    display.addText('Hello LineDisplay Ak'); // Add the text
+
+    if (ePosDisplay.isConnected) {
+      display.send(); // send the command to line display
+    }
+  }
+
 //initialisation
 $(document).ready(function(){
 	$("#connectBtn").click(function(){
@@ -112,11 +154,20 @@ $(document).ready(function(){
 	$("#printBtn").click(function(){
 		createData();
 	});
+	$("#connectDisplay").click(function(){
+		connectLineDisplay();
+	});
+	$("#showDisplay").click(function(){
+		showDisplayData();
+	});
 });
 
 </script>
 ePOS SDK Javascript <br /><br />
 <button id="connectBtn">connect</button>
 <button id="printBtn">basic print</button>
+<br><br>
+<button id="connectDisplay">connect display</button>
+<button id="showDisplay">show Display</button>
 </body>
 </html>
