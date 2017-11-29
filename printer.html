@@ -10,10 +10,10 @@
 
   var ePosDev = new epson.ePOSDevice();
 	function connect(){
-    var ip = '192.168.1.53'
+    var ip = '192.168.1.51'
     var port = '8008'
-    // ePosDev.connect(ip, port, callback_connect)
-    ePosDev.connect('192.168.1.53', '8008', callback_connect)
+    ePosDev.connect(ip, port, callback_connect)
+    // ePosDev.connect('192.168.1.53', '8008', callback_connect)
   }
 
   function callback_connect(resultConnect) {
@@ -33,8 +33,11 @@
     alert('connected')
 
     printer.onreceive = function (response) {
+      console.log(response)
       if (response.success) {
         alert('Print Complete')
+        printer.addPulse(printer.DRAWER_1, printer.PULSE_100);
+        // printer.send();
       } else {
         alert('Error', response.code)
       }
